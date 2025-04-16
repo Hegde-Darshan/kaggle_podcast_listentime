@@ -1,6 +1,6 @@
 outs:
-- md5: 1940f261732b2fcd04bf50383cb769ef.dir
-  size: 359968608
-  nfiles: 5
+- md5: 25663bbd0cf8b4a9a4d3809a5190c95d.dir
+  size: 359963419
+  nfiles: 4
   hash: md5
   path: SourceData

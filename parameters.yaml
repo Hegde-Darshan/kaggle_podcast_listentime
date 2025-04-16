@@ -1,0 +1,11 @@
+preprocess:
+  input: SourceData/train.csv
+  output: SourceData/processed
+  models: models/
+
+train:
+  data: SourceData/processed
+  models: models/
+
+test:
+  data: SourceData/test.csv

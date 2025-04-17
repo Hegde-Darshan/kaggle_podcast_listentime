@@ -3,9 +3,20 @@ preprocess:
   output: SourceData/processed
   models: models/
 
-train:
-  data: SourceData/processed
+experimentation:
+  experiment_name: regressor_models
+  data: SourceData/processed/transformed.csv
   models: models/
+  exp_models:
+    sgd_regressor:
+      loss: 'squared_error'
+      penalty: 'elasticnet'
+      iterations: 250 
+    svm:
+      iterations: 250
+    adaboost:
+      n_estimators: 500
+
 
 test:
   data: SourceData/test.csv

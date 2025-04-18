@@ -4,18 +4,18 @@ preprocess:
   models: models/
 
 experimentation:
-  experiment_name: regressor_models
+  experiment_name: podcast_listentime
   data: SourceData/processed/transformed.csv
   models: models/
   exp_models:
     sgd_regressor:
       loss: 'squared_error'
       penalty: 'elasticnet'
-      iterations: 250 
+      iterations: 600 
     svm:
-      iterations: 250
+      iterations: 600
     adaboost:
-      n_estimators: 500
+      n_estimators: 1000
 
 
 test:

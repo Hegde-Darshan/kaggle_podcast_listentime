@@ -1,3 +1,4 @@
+import mlflow.entities
 import pandas as pd
 import numpy as np
 import yaml
@@ -58,22 +59,40 @@ def ml_experiment(X, y, output_path, model_type:Literal['SGDRegressor', 'svm', '
 
     mlflow.end_run()
     mlflow.set_tracking_uri(os.environ['MLFLOW_TRACKING_URI'])
+    mlflow.set_experiment(experiment_name="podcast_listentime")
 
-    with mlflow.start_run(run_name='sklearn_'+model_type) as run:
-        model = model_init(params, model_type)
-        model.fit(X_train, y_train)
+    client = mlflow.tracking.MlflowClient()
+    existing_run = client.search_runs(
+        experiment_ids=0, 
+        run_view_type= mlflow.entities.ViewType.ACTIVE_ONLY, 
+        filter_string= f"tags.mlflow.runName = 'sklearn_{model_type}'",
+        max_results=1
+    )
 
-        mlflow.log_params(model.get_params())
-        
-        test_metrics = calc_metrics(y_test, model.predict(X_test), 'rmse')
-        mlflow.log_metrics(test_metrics)
+    if not existing_run:
+        mlflow.start_run(run_name='sklearn_'+model_type)
+    else:
+        parent_run = existing_run[0]
+        parent_run_id = parent_run.info.run_id
+        mlflow.start_run(run_id= parent_run_id)
+        mlflow.start_run(nested=True)
+    
+    model = model_init(params, model_type)
+    model.fit(X_train, y_train)
 
-        test_metrics = calc_metrics(y_test, model.predict(X_test), 'mae')
-        mlflow.log_metrics(test_metrics)
+    mlflow.log_params(model.get_params())
+    
+    test_metrics = calc_metrics(y_test, model.predict(X_test), 'rmse')
+    mlflow.log_metrics(test_metrics)
 
-        signature = mlflow.models.infer_signature(X_train, y_train)
+    test_metrics = calc_metrics(y_test, model.predict(X_test), 'mae')
+    mlflow.log_metrics(test_metrics)
 
-        mlflow.sklearn.log_model(model, "SGDreg_model", signature=signature)
+    signature = mlflow.models.infer_signature(X_train, y_train)
+
+    mlflow.sklearn.log_model(model, f"{model_type}_model", signature=signature)
+
+    mlflow.end_run()
     
     #save model locally
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
@@ -88,5 +107,5 @@ if __name__ == "__main__":
     data = pd.read_csv(params['data'])
     X, y = data.drop(columns=['Listening_Time_minutes']), data[['Listening_Time_minutes']]
 
-    ml_experiment(X, y, params['models'], 'SGDRegressor', params)
-    
+    for each_type in ['SGDRegressor', 'svm']:
+        ml_experiment(X, y, params['models'], each_type, params)

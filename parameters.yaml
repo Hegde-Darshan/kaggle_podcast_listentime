@@ -17,6 +17,10 @@ experimentation:
     adaboost:
       n_estimators: 1000
 
-
+dl_experimentation:
+  experiment_name: podcast_listentime
+  data: SourceData/processed/transformed.csv
+  models: models/
+  
 test:
   data: SourceData/test.csv

@@ -15,6 +15,9 @@ from tensorflow import keras
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Flatten, BatchNormalization, Activation, Input
 
+from keras_tuner import RandomSearch
+from keras_tuner.engine.hyperparameters import HyperParameters
+
 
 os.environ['MLFLOW_TRACKING_URI'] = "https://dagshub.com/Hegde-Darshan/kaggle_podcast_listentime.mlflow"
 os.environ['MLFLOW_TRACKING_USERNAME'] = 'Hegde-Darshan'
@@ -28,16 +31,18 @@ def model_init(input_shape):
     model = Sequential()
     model.add(Input(shape=(input_shape[1],)))
     model.add(Dense(128, activation='relu'))
+    model.add(BatchNormalization(momentum=0.9))
     model.add(Dropout(0.2))
     model.add(Dense(128, activation='relu'))
+    model.add(BatchNormalization(momentum=0.9))
     model.add(Dropout(0.2))
     model.add(Dense(1, activation='linear'))
     
-    model.compile(optimizer='adam', loss='mean_squared_error', metrics=['mae'])
-
+    model.compile(optimizer='adam', loss='mean_squared_error', metrics=['mae'], initializer='he_normal')
+    print(model.summary())
     return model
 
-
+ 
 def dl_experiment(X, y, output_path, params):
         
         input_shape = X.shape
